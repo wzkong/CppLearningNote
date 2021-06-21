@@ -1509,7 +1509,7 @@ int main()
 }
 ```
 
-#### 5.4.2 传统的for语句
+##### 5.4.2 传统的for语句
 
 ```c++
 for (init-statemen; condition; expression) // 先执行init-statement，判断condition
@@ -1553,4 +1553,595 @@ int main()
 	return 0;
 }
 ```
+
+##### 5.4.3 范围for语句
+
+```
+for (declaration : expression)
+	statement
+```
+
+##### 5.4.4 do while 语句
+
+```
+do
+	statement
+while (condition);
+```
+
+![image-20210621135720675](README.assets/image-20210621135720675.png)
+
+```c++
+#include <iostream>
+#include <string>
+
+using std::cout; using std::cin; using std::endl; using std::string;
+
+int main()
+{
+	string rsp;
+	do
+	{
+		cout << "Input two strings: ";
+		string str1, str2;
+		cin >> str1 >> str2;
+		cout << (str1 <= str2 ? str1 : str2)
+			<< " is less than the other. " << "\n\n"
+			<< "More? Enter yes or no: ";
+		cin >> rsp;
+	} while (tolower(rsp[0]) == 'y');
+	return 0;
+```
+
+#### 5.5 跳转语句
+
+`break`	`continue`	`goto`	 `return`
+
+##### 5.5.1 break语句
+
+![image-20210621140739658](README.assets/image-20210621140739658.png)
+
+**练习**
+
+![image-20210621140904240](README.assets/image-20210621140904240.png)
+
+```c++
+#include <iostream>
+#include <string>
+using std::cout; using std::cin; using std::endl; using std::string;
+
+int main()
+{
+	string read, tmp;
+	while (cin >> read)
+		if (read == tmp) break; else tmp = read;
+
+	if (cin.eof())  cout << "no word was repeated." << endl;
+	else            cout << read << " occurs twice in succession." << endl;
+
+	return 0;
+}
+```
+
+##### 5.5.2 continue 语句
+
+![image-20210621142735243](README.assets/image-20210621142735243.png)
+
+##### 5.5.3 goto语句
+
+![image-20210621142926153](README.assets/image-20210621142926153.png)
+
+```
+goto label;
+label:
+后面的都是
+```
+
+#### 5.6 try语句块和异常处理
+
+![image-20210621144908679](README.assets/image-20210621144908679.png)
+
+##### 5.6.1 throw表达式
+
+异常检测部分使用throw表达式引发一个异常
+
+![image-20210621145621854](README.assets/image-20210621145621854.png)
+
+##### 5.6.2 try语句块
+
+```c++
+try {
+	program-statements
+} catch (exception-declaration) {
+	handler-statements
+}
+```
+
+```c++
+while (true)
+    {
+        try
+        {
+            throw runtime_error("Data must refer to same ISBN");
+        }
+        catch (runtime_error err)
+        {
+            cout << err.what()
+                << "\nTry Again? Enter y or n" << endl;
+            char c;
+            cin >> c;
+            if (!cin || c == 'n')
+                break;
+        }
+    }
+    return 0;
+```
+
+##### 5.6.3 标准异常
+
+![](README.assets/image-20210621151245793.png)
+
+![image-20210621151306024](README.assets/image-20210621151306024.png)
+
+**练习**
+
+![image-20210621152523187](README.assets/image-20210621152523187.png)
+
+```c++
+#include <iostream>
+#include <stdexcept>
+using std::cin; using std::cout; using std::endl; using std::runtime_error;
+
+int main(void)
+{
+	int i, j;
+	cout << "please input tow numbers: " << endl;
+	while (cin >> i >> j)
+	{
+		try
+		{
+			if (j == 0)
+				throw runtime_error("divisor is 0");
+			cout << i / j << endl;
+		}
+		catch (runtime_error err)
+		{
+			cout << err.what() << "\nTry Again? Enter y or n" << endl;
+			char c;
+			cin >> c;
+			if (c != 'y')
+				break;
+		}
+		cout << "please input tow numbers: " << endl;
+	}
+
+	return 0;
+}
+```
+
+### 第六章 函数
+
+函数定义和声明，包括参数传入函数以及如何返回结果
+
+允许重载函数，即不同函数可以使用同一个名字
+
+函数指针
+
+#### 6.1 函数基础
+
+返回类型、名字、形参数列表、函数体
+
+**编写函数**
+
+```c++
+int fact(int val)
+{
+	int result = 1;
+	while (val > 1)
+		result *= val--;
+	
+	return result;
+}
+```
+
+**调用函数**
+
+![image-20210621155819965](README.assets/image-20210621155819965.png)
+
+**形参和实参**
+
+实参的类型和数量必须与形参匹配，类型会有强制类型转换
+
+**函数的形参列表**
+
+空：void f1(void)
+
+必须把每个类型都写出来
+
+任意两个形参不能同名，且函数最外层变量也不能同名
+
+**函数返回类型**
+
+不返回是void
+
+返回类型不能是数组类型或函数类型，但是可以是指向数组或函数的指针
+
+**练习**
+
+![image-20210621160517444](README.assets/image-20210621160517444.png)
+
+```c++
+int fact(int i)
+{
+	return i > 1 ? i * fact(i - 1) : 1;
+}
+
+void interactive_fact()
+{
+	std::string const prompt = "Enter a number within [1, 13) :\n";
+	std::string const out_of_range = "Out of range, please try again.\n";
+	for (int i; std::cout << prompt, std::cin >> i;)
+	{
+		if (i < 1 || i > 12)
+		{
+			std::cout << out_of_range;
+			continue;
+		}
+		std::cout << fact(i) << std::endl;
+	}
+}
+
+int main()
+{
+	interactive_fact();
+	return 0;
+}
+```
+
+![image-20210621163328146](README.assets/image-20210621163328146.png)
+
+```c++
+#include <iostream>
+
+int abs(int i)
+{
+    return i > 0 ? i : -i;
+}
+
+int main()
+{
+    std::cout << abs(-5) << std::endl;
+    return 0;
+}
+```
+
+##### 6.1.1 局部对象
+
+![image-20210621164317561](README.assets/image-20210621164317561.png)
+
+**自动对象**
+
+**局部静态对象**（定义的时候会被初始化，其他都不会）
+
+![image-20210621164425135](README.assets/image-20210621164425135.png)
+
+![image-20210621164700597](README.assets/image-20210621164700597.png)
+
+##### 6.1.2 函数声明
+
+只可以定义一次，声明多次。 如果一个函数永远不会被用到，可以只有声明，没有定义。
+
+声明无需函数体，用一个分号代替
+
+可以无需形参的名字，但是也最好写
+
+**在头文件中进行函数声明**
+
+##### 6.1.3 分离式编译
+
+![image-20210621165134978](README.assets/image-20210621165134978.png)
+
+**编译和链接多个源文件**
+
+如果修改了一个源文件，只需要重新编译改动了的文件
+
+![image-20210621165312876](README.assets/image-20210621165312876.png)
+
+#### 6.2 参数传递
+
+![image-20210621170357358](README.assets/image-20210621170357358.png)
+
+引用的话才可以更改原来的值**引用调用**，不然的话只是拷贝**值传递**
+
+##### 6.2.1 传值参数
+
+形参操作不影响实参
+
+**指针形参**
+
+![image-20210621170715170](README.assets/image-20210621170715170.png)
+
+![image-20210621170703165](README.assets/image-20210621170703165.png)
+
+**练习**
+
+![image-20210621170912639](README.assets/image-20210621170912639.png)
+
+```c++
+#include <iostream>
+#include <string>
+
+void swap(int* lhs, int* rhs)
+{
+	int tmp;
+	tmp = *lhs;
+	*lhs = *rhs;
+	*rhs = tmp;
+}
+
+int main()
+{
+	for (int lft, rht; std::cout << "Please Enter:\n", std::cin >> lft >> rht;)
+	{
+		swap(&lft, &rht);
+		std::cout << lft << " " << rht << std::endl;
+	}
+
+	return 0;
+}
+```
+
+##### 6.2.2 传引用参数
+
+相当于别名
+
+**使用引用避免拷贝**
+
+​	拷贝比较低效，且有的不支持拷贝操作
+
+![image-20210621204027537](README.assets/image-20210621204027537.png)
+
+**使用引用形参返回额外信息**
+
+可以帮助返回多个值
+
+![image-20210621204220188](README.assets/image-20210621204220188.png)
+
+**练习**
+
+![image-20210621210034547](README.assets/image-20210621210034547.png)
+
+```c++
+#include <iostream>
+#include <string>
+
+void swap(int &lhs, int &rhs)
+{
+	int tmp;
+	tmp = lhs;
+	lhs = rhs;
+	rhs = tmp;
+}
+
+int main()
+{
+	for (int lft, rht; std::cout << "Please Enter:\n", std::cin >> lft >> rht;)
+	{
+		swap(lft, rht);
+		std::cout << lft << " " << rht << std::endl;
+	}
+
+	return 0;
+}
+```
+
+##### 6.2.3 const 形参和实参
+
+![image-20210621211236860](README.assets/image-20210621211236860.png)
+
+**指针或 引用形参与const**
+
+**尽量使用常量引用**
+
+**练习**
+
+![image-20210621212701029](README.assets/image-20210621212701029.png)
+
+```c++
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace::std;
+bool is_upper(const string &s)
+{
+    for (auto c : s)
+        if (isupper(c))
+            return false;
+        else
+            return true;
+}
+
+string to_lowercase(string &s)
+{
+    for (auto &c : s)
+        if (isupper(c))
+            c = tolower(c);
+    return s;
+}
+
+int main()
+{
+	string str = "adFasdf";
+
+	cout << is_upper(str) << endl;
+    cout << to_lowercase(str) << endl;
+
+	return 0;
+}
+```
+
+##### 6.2.4 数组形参
+
+数组不允许拷贝数组；使用数组时会将其转换成指针
+
+所以实际上传递的是首元素的指针
+
+![image-20210621220251521](README.assets/image-20210621220251521.png)
+
+函数不知道数组的确切尺寸，所以
+
+**使用标记指定数组长度**
+
+要求数组本身包含一个结束标记，C风格字符串
+
+![image-20210621220808170](README.assets/image-20210621220808170.png)
+
+**使用标准库规范**
+
+传递首元素和尾后元素
+
+![image-20210621220910952](README.assets/image-20210621220910952.png)
+
+**显示传递一个表示数组大小的形参**
+
+![image-20210621220957711](README.assets/image-20210621220957711.png)
+
+**数组形参和const**
+
+![image-20210621221442428](README.assets/image-20210621221442428.png)
+
+**数组引用形参**
+
+![image-20210621221511971](README.assets/image-20210621221511971.png)
+
+这个会有大小限制
+
+**传递多维数组**
+
+![image-20210621222517735](README.assets/image-20210621222517735.png)
+
+![image-20210621222530334](README.assets/image-20210621222530334.png)
+
+**练习**
+
+![image-20210621223844280](README.assets/image-20210621223844280.png)
+
+```c++
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace::std;
+
+void swap(int *&lft, int *&rft)
+{
+    auto tmp = lft;
+    lft =rft;
+    rft = tmp;
+}
+
+int main()
+{
+	int i = 42, j = 99;
+	auto lft = &i;
+	auto rht = &j;
+	swap(lft, rht);
+	cout << *lft << " " << *rht << endl;
+	return 0;
+}
+```
+
+##### 6.2.5 main: 处理命令行选项
+
+![image-20210621224538314](README.assets/image-20210621224538314.png)
+
+![image-20210621224622965](README.assets/image-20210621224622965.png)
+
+![image-20210621224632413](README.assets/image-20210621224632413.png)
+
+![image-20210621224648571](README.assets/image-20210621224648571.png)
+
+![image-20210621224904969](README.assets/image-20210621224904969.png)
+
+![image-20210621225317028](README.assets/image-20210621225317028.png)
+
+```c++
+#include <iostream>
+#include <string>
+
+int main(int argc, char **argv)
+{
+	std::string str;
+	for (int i = 1; i != argc; ++i)
+		str += std::string(argv[i]) + " ";
+
+	std::cout << str << std::endl;
+	return 0;
+}
+```
+
+##### 6.2.6 含有可变形参的函数
+
+两种方法： 
+
+* 所有实参类型相同： `initializer_list`
+* 特殊函数，可变参数模板
+
+**initializer_list**
+
+![image-20210621232930601](README.assets/image-20210621232930601.png)
+
+![image-20210621233033477](README.assets/image-20210621233033477.png)
+
+**省略符形参**
+
+![image-20210621233304168](README.assets/image-20210621233304168.png)
+
+**练习**
+
+![image-20210621233342615](README.assets/image-20210621233342615.png)
+
+```c++
+  
+#include <iostream>
+#include <initializer_list>
+
+int sum(std::initializer_list<int> const& il)
+{
+	int sum = 0;
+	for (auto i : il) 
+		sum += i;
+	return sum;
+}
+
+int main(void)
+{
+	auto il = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	std::cout << sum(il) << std::endl;
+
+	return 0;
+}
+```
+
+#### 6.3 返回类型和return语句
+
+#### 6.3.1 无返回值函数
+
+* 无返回值
+* void函数
+
+`return;`
+
+##### 6.3.2 有返回值函数
+
+保证类型是正确的
+
+![image-20210621234820995](README.assets/image-20210621234820995.png)
+
+**值如何被返回**
+
+![image-20210621235234202](README.assets/image-20210621235234202.png)
+
+**不要返回局部对象的引用和指针**
+
+![image-20210621235347804](README.assets/image-20210621235347804.png)
 
