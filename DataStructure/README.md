@@ -434,3 +434,85 @@ O（nlogn）
 
 ![image-20210727220919456](README.assets/image-20210727220919456.png)
 
+### （b）无序列表
+
+#### 03B-1 循秩访问
+
+效率低下
+
+![image-20210729204603510](README.assets/image-20210729204603510.png)
+
+#### 03B-2 查找
+
+![image-20210729204749002](README.assets/image-20210729204749002.png)
+
+#### 03B-3 插入与复制
+
+![image-20210729205632596](README.assets/image-20210729205632596.png)
+
+![image-20210729210034039](README.assets/image-20210729210034039.png)
+
+#### 03B-4 删除与析构
+
+![image-20210729210141057](README.assets/image-20210729210141057.png)
+
+![image-20210729210407839](README.assets/image-20210729210407839.png)
+
+#### 03B-5 唯一化
+
+![image-20210729210712004](README.assets/image-20210729210712004.png)
+
+![image-20210729210812046](README.assets/image-20210729210812046.png)
+
+### （c）有序列表
+
+#### 03C-1 唯一化·构思
+
+![image-20210729210859195](README.assets/image-20210729210859195.png)
+
+#### 03C-3 查找
+
+![image-20210729211020612](README.assets/image-20210729211020612.png)
+
+### （d）选择排序
+
+#### 03D-1 构思
+
+从篮子里面找到最大的苹果，然后放在第一个位置
+
+#### 03D-2 实例
+
+![image-20210729211643862](README.assets/image-20210729211643862.png)
+
+#### 03D-3 实现
+
+![image-20210729211718591](README.assets/image-20210729211718591.png)
+
+![image-20210729212056239](README.assets/image-20210729212056239.png)
+
+#### 03D-6 性能
+
+![image-20210729212632434](README.assets/image-20210729212632434.png)
+
+### （e）插入排序
+
+#### 03E-2 构思
+
+![image-20210729212908404](README.assets/image-20210729212908404.png)
+
+#### 03E-4 实例
+
+![image-20210729213101410](README.assets/image-20210729213101410.png)
+
+#### 03E-5 实现
+
+![image-20210729213139548](README.assets/image-20210729213139548.png)
+
+#### 03E-6 性能分析
+
+![image-20210729213405498](README.assets/image-20210729213405498.png)
+
+#### 03E-7 平均性能
+
+![image-20210729213456157](README.assets/image-20210729213456157.png)
+
