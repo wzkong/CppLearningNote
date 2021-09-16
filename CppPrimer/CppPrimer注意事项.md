@@ -144,3 +144,96 @@ assert( p != NULL );    // assert 不可用
 #endif
 ```
 
+## 第II部分 C++标准库
+
+### 第八章 IO库
+
+```
+#头文件
+#include <iostream>
+#include <fstream>
+#include <sstream>
+```
+
+
+
+#### 8.1 IO类
+
+**8.1.1 IO对象无拷贝或赋值**（引用）
+
+**8.1.2 条件状态**
+
+```
+#bad eof fail good后面可以加bit
+cin.bad()
+
+cin.clear()
+cin.clear(cin.rdstate() & ~cin.failbit & ~cin.badbit) #复位failbit和badbit
+
+cin.rdstate()
+cin.setstate()
+```
+
+```c++
+istream &print( istream &is ) {
+    string buff;
+    while (cin >> buff) {
+    	cout << buff << endl;
+    }
+    is.clear();
+    return is;
+}
+```
+
+**8.1.3 管理输出缓存**
+
+刷新输出缓冲区
+
+```
+    cout << "hi" << endl;
+    cout << "hi" << flush;
+    cout << "hi" << ends;
+```
+
+```
+cout << unitbuf; 输出操作后马上刷新缓冲区
+cout << nounitbuf; 回到正常
+```
+
+```
+#关联
+cin.tie(&cout)#指针
+```
+
+**8.2 文件输入输出**
+
+```c++
+string filename = "./data.txt"; // string或者C风格字符串
+    string test;
+    ifstream input(filename);
+    while (input >> test)
+        cout << test << ends;
+    cout << endl;
+
+    input.close();
+    cout << "If open: " << input.is_open() << endl;
+    input.open("./data2.txt");
+    ofstream output("./data_tmp.txt");
+    while (input >> test)
+        output << test << endl;
+    input.close();
+    output.close();
+```
+
+```
+用文件名直接初始化相当于用了open
+流程：
+创建对象
+open(s)
+close()
+
+is_open()
+```
+
+
+
