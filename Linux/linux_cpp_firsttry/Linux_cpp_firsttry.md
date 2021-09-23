@@ -1783,3 +1783,377 @@ gcc  add.o  div.o  main.o  mult.o  sub.o -o calc
 
 makefile 中的变量分为三种：**自定义变量，预定义变量和自动变量**。
 
+**自定义变量**
+
+用 `Makefile` 进行规则定义的时候，用户可以定义自己的变量，称为用户自定义变量。`makefile` 中的变量是没有类型的，直接创建变量然后给其赋值就可以了。
+
+```
+# 错误, 只创建了变量名, 没有赋值
+变量名 
+# 正确, 创建一个变量名并且给其赋值
+变量名=变量值
+
+# 如果将变量的值取出?
+$(变量的名字)
+
+# 举例 add.o  div.o  main.o  mult.o  sub.o
+# 定义变量并赋值
+obj=add.o  div.o  main.o  mult.o  sub.o
+# 取变量的值
+$(obj)
+```
+
+**例子**
+
+```
+# 这是一个规则，普通写法
+calc:add.o  div.o  main.o  mult.o  sub.o
+        gcc  add.o  div.o  main.o  mult.o  sub.o -o calc
+        
+# 这是一个规则，里边使用了自定义变量
+obj=add.o  div.o  main.o  mult.o  sub.o
+target=calc
+$(target):$(obj)
+        gcc  $(obj) -o $(target)
+```
+
+**预定义变量**
+
+在 Makefile 中有一些已经定义的变量，用户可以直接使用这些变量，不用进行定义。在进行编译的时候，某些条件下 Makefile 会使用这些预定义变量的值进行编译。这些预定义变量的名字一般都是大写的，经常采用的预定义变量如下表所示
+
+变 量 名	含 义	默 认 值
+AR	生成静态库库文件的程序名称	ar
+AS	汇编编译器的名称	as
+CC	C 语言编译器的名称	cc
+CPP	C 语言预编译器的名称	$(CC) -E
+CXX	C++ 语言编译器的名称	g++
+FC	FORTRAN 语言编译器的名称	f77
+RM	删除文件程序的名称	rm -f
+ARFLAGS	生成静态库库文件程序的选项	无默认值
+ASFLAGS	汇编语言编译器的编译选项	无默认值
+CFLAGS	C 语言编译器的编译选项	无默认值
+CPPFLAGS	C 语言预编译的编译选项	无默认值
+CXXFLAGS	C++ 语言编译器的编译选项	无默认值
+FFLAGS	FORTRAN 语言编译器的编译选项	无默认
+
+**例子**
+
+```
+# 这是一个规则，普通写法
+calc:add.o  div.o  main.o  mult.o  sub.o
+        gcc  add.o  div.o  main.o  mult.o  sub.o -o calc
+        
+# 这是一个规则，里边使用了自定义变量和预定义变量
+obj=add.o  div.o  main.o  mult.o  sub.o
+target=calc
+CFLAGS=-O3 # 代码优化
+$(target):$(obj)
+        $(CC)  $(obj) -o $(target) $(CFLAGS)
+```
+
+**自动变量**
+
+Makefile 中的变量除了用户自定义变量和预定义变量外，还有一类自动变量。Makefile 中的规则语句中经常会出现目标文件和依赖文件，**自动变量用来代表这些规则中的目标文件和依赖文件，并且它们只能在规则的命令中使用。**
+
+变 量	含 义
+$*	表示目标文件的名称，不包含目标文件的扩展名
+$+	表示所有的依赖文件，这些依赖文件之间以空格分开，按照出现的先后为顺序，其中可能 包含重复的依赖文件
+$<	表示依赖项中第一个依赖文件的名称
+$?	依赖项中，所有比目标文件时间戳晚的依赖文件，依赖文件之间以空格分开
+$@	表示目标文件的名称，包含文件扩展名
+$^	依赖项中，所有不重复的依赖文件，这些文件之间以空格分开
+
+**例子**
+
+```
+# 这是一个规则，普通写法
+calc:add.o  div.o  main.o  mult.o  sub.o
+        gcc  add.o  div.o  main.o  mult.o  sub.o -o calc
+        
+# 这是一个规则，里边使用了自定义变量
+# 使用自动变量, 替换相关的内容
+calc:add.o  div.o  main.o  mult.o  sub.o
+	gcc $^ -o $@ 			# 自动变量只能在规则的命令中使用
+```
+
+#### 模式匹配
+
+原来
+
+```
+calc:add.o  div.o  main.o  mult.o  sub.o
+        gcc  add.o  div.o  main.o  mult.o  sub.o -o calc
+# 语法格式重复的规则, 将 .c -> .o, 使用的命令都是一样的 gcc *.c -c
+add.o:add.c
+        gcc add.c -c
+
+div.o:div.c
+        gcc div.c -c
+
+main.o:main.c
+        gcc main.c -c
+
+sub.o:sub.c
+        gcc sub.c -c
+
+mult.o:mult.c
+        gcc mult.c -c
+```
+
+二到六的规则相同，可以整理成一个模板，所有类似的操作通过模板去匹配makefile
+
+**例子**
+
+```
+# 模式匹配 -> 通过一个公式, 代表若干个满足条件的规则
+# 依赖有一个, 后缀为.c, 生成的目标是一个 .o 的文件, % 是一个通配符, 匹配的是文件名
+%.o:%.c
+	gcc $< -c
+```
+
+![](Linux_cpp_firsttry.assets/image-20200418143747981-1611845766993.png)
+
+#### 函数
+
+makefile 中有很多函数并且所有的函数都是有返回值的。makefile 中函数的格式和 C/C++ 中函数也不同，其写法是这样的： `$(函数名 参数1, 参数2, 参数3, ...)`，主要目的是让我们能够快速方便的得到函数的返回值。
+
+这里为大家介绍两个 makefile 中使用频率比较高的函数：`wildcard` 和 `patsubst`。
+
+**wildcard**
+
+获取指定目录下指定类型的文件名，其返回值是以空格分割的、指定目录下的所有符合条件的文件名列表
+
+```
+# 该函数的参数只有一个, 但是这个参数可以分成若干个部分, 通过空格间隔
+$(wildcard PATTERN...)
+	参数:	指定某个目录, 搜索这个路径下指定类型的文件，比如： *.c
+```
+
+* 参数：
+  * PATTERN 指的是某个或多个目录下的对应的某种类型的文件，比如当前目录下的`.c` 文件可以写成 `*.c`
+  * 可以指定多个目录，每个路径之间使用空格间隔
+* 返回值：
+  * 得到的若干个文件的文件列表， 文件名之间使用空格间隔
+  * 示例：$(wildcard *.c ./sub/*.c)
+    * 返回值格式: a.c b.c c.c d.c e.c f.c ./sub/aa.c ./sub/bb.c
+
+
+**例子**
+
+```
+# 使用举例: 分别搜索三个不同目录下的 .c 格式的源文件
+src = $(wildcard /home/robin/a/*.c /home/robin/b/*.c *.c)  # *.c == ./*.c
+# 返回值: 得到一个大的字符串, 里边有若干个满足条件的文件名, 文件名之间使用空格间隔
+/home/robin/a/a.c /home/robin/a/b.c /home/robin/b/c.c /home/robin/b/d.c e.c f.c
+```
+
+**patsubst**
+
+按照指定的模式替换指定的文件名的后缀
+
+```
+# 有三个参数, 参数之间使用 逗号间隔
+$(patsubst <pattern>,<replacement>,<text>)
+```
+
+* 参数功能：
+  * pattern: 这是一个模式字符串，需要指定出要被替换的文件名中的后缀是什么
+    * 文件名和路径不需要关心，因此使用 % 表示即可 [通配符是 %]
+    * 在通配符后边指定出要被替换的后缀，比如: %.c, 意味着 .c 的后缀要被替换掉
+  * replacement: 这是一个模式字符串，指定参数 pattern 中的后缀最终要被替换为什么
+    * 还是使用 % 来表示参数 pattern 中文件的路径和名字
+    * 在通配符 % 后边指定出新的后缀名，比如: %.o 这表示原来的后缀被替换为 .o
+  * text: 该参数中存储这要被替换的原始数据
+  * 返回值
+
+**例子**
+
+```
+src = a.cpp b.cpp c.cpp e.cpp
+# 把变量 src 中的所有文件名的后缀从 .cpp 替换为 .o
+obj = $(patsubst %.cpp, %.o, $(src)) 
+# obj 的值为: a.o b.o c.o e.o
+```
+
+#### makefile的编写
+
+从不标准到标准
+
+```
+# 项目目录结构
+.
+├── add.c
+├── div.c
+├── head.h
+├── main.c
+├── mult.c
+└── sub.c
+# 需要编写makefile对该项目进行自动化编译
+```
+
+**1**
+
+```
+calc:add.c  div.c  main.c  mult.c  sub.c
+        gcc add.c  div.c  main.c  mult.c  sub.c -o calc
+```
+
+这个版本的优点：书写简单
+
+这版本的缺点：只要依赖中的某一个源文件被修改，所有的源文件都需要被重新编译，太耗时、效率低
+
+改进方式：提高效率，修改哪一个源文件，哪个源文件被重新编译，不修改就不重新编译。
+
+**2**
+
+```
+# 默认所有的依赖都不存在, 需要使用其他规则生成这些依赖
+# 因为 add.o 被更新, 需要使用最新的依赖, 生成最新的目标
+calc:add.o  div.o  main.o  mult.o  sub.o
+        gcc  add.o  div.o  main.o  mult.o  sub.o -o calc
+
+# 如果修改了add.c, add.o 被重新生成
+add.o:add.c
+        gcc add.c -c
+
+div.o:div.c
+        gcc div.c -c
+
+main.o:main.c
+        gcc main.c -c
+
+sub.o:sub.c
+        gcc sub.c -c
+
+mult.o:mult.c
+        gcc mult.c -c
+```
+
+这个版本的优点：相较于版本 1 效率提升了
+
+这个版本的缺点：规则比较冗余，需要精简
+
+改进方式：在 makefile 中使用变量 和 模式匹配
+
+**3**
+
+```
+# 添加自定义变量 -> makefile中注释前 使用 # 
+obj=add.o  div.o  main.o  mult.o  sub.o
+target=calc
+
+$(target):$(obj)
+        gcc $(obj)  -o $(target)
+
+%.o:%.c
+        gcc $< -c
+```
+
+这个版本的优点：文件精简不少，变得简洁了
+
+这个版本的缺点：变量 obj 的值需要手动的写出来，如果需要编译的项目文件很多，都用手写出来不现实
+
+改进方式：在 makefile 中使用函数
+
+**4**
+
+```
+# 添加自定义变量 -> makefile中注释前 使用 # 
+# 使用函数搜索当前目录下的源文件 .c
+src=$(wildcard *.c)
+# 将源文件的后缀替换为 .o
+# % 匹配的内容是不能被替换的, 需要替换的是第一个参数中的后缀, 替换为第二个参数中指定的后缀
+# obj=$(patsubst %.cpp, %.o, $(src)) 将src中的关键字 .cpp 替换为 .o
+obj=$(patsubst %.c, %.o, $(src))
+target=calc
+
+$(target):$(obj)
+        gcc $(obj)  -o $(target)
+
+%.o:%.c
+        gcc $< -c
+```
+
+这个版本的优点：解决了自动加载项目文件的问题，解放了双手
+
+这个版本的缺点：没有文件删除的功能，不能删除项目编译过程中生成的目标文件（*.o）和可执行程序
+
+改进方式：在 makefile 文件中添加新的规则用于删除生成的目标文件（*.o）和可执行程序
+
+**5**
+
+```
+# 添加自定义变量 -> makefile中注释前 使用 # 
+# 使用函数搜索当前目录下的源文件 .c
+src=$(wildcard *.c)
+# 将源文件的后缀替换为 .o
+obj=$(patsubst %.c, %.o, $(src))
+target=calc
+# obj 的值 xxx.o xxx.o xxx.o xx.o
+$(target):$(obj)
+        gcc $(obj)  -o $(target)
+
+%.o:%.c
+        gcc $< -c
+
+# 添加规则, 删除生成文件 *.o 可执行程序
+# 这个规则比较特殊, clean根本不会生成, 这是一个伪目标
+clean:
+        rm $(obj) $(target)
+```
+
+这个版本的优点：添加了新的规则（16 行）用于文件的删除，直接 make clean 就可以执行规则中的删除命令了
+
+这个版本的缺点：在下面有具体的问题演示和分析
+
+改进方式：在 makefile 文件中声明 clean 是一个伪目标，让 make 放弃对它的时间戳检测。
+
+正常情况下这个版本的 `makefile` 是可以正常工作的，但是我们如果在这个项目目录中添加一个叫做 `clean` 的文件（和规则中的目标名称相同），再进行 `make clean` 发现这个规则就不能正常工作了。问题如下：
+
+```
+# 在项目目录中添加一个叫 clean的文件, 然后在 make clean 这个规则中的命令就不工作了
+$ ls
+add.c  calc   div.c  head.h  main.o    mult.c  sub.c
+add.o  div.o  main.c  makefile  mult.o  sub.o  clean  ---> 新添加的
+
+# 使用 makefile 中的规则删除生成的目标文件和可执行程序
+$ make clean
+make: 'clean' is up to date. 
+
+# 查看目录, 发现相关文件并没有被删除, make clean 失败了
+$ ls
+add.c  calc   div.c  head.h  main.o    mult.c  sub.c
+add.o  clean  div.o  main.c  makefile  mult.o  sub.o
+```
+
+这个问题的关键点在于 clean 是一个伪目标，不对应任何实体文件，在前边讲关于文件时间戳更新问题的时候说过，如果目标不存在规则的命令肯定被执行， 如果目标文件存在了就需要比较规则中目标文件和依赖文件的时间戳，满足条件才执行规则的命令，否则不执行。
+
+解决这个问题需要在 makefile 中声明 clean 是一个伪目标，这样 make 就不会对文件的时间戳进行检测，规则中的命令也就每次都会被执行了。
+
+在 makefile 中声明一个伪目标需要使用 `.PHONY` 关键字，声明方式为: `.PHONY:伪文件名称`
+
+**Final**
+
+```
+# 添加自定义变量 -> makefile中注释前 使用 # 
+# 使用函数搜索当前目录下的源文件 .c
+src=$(wildcard *.c)
+# 将源文件的后缀替换为 .o
+obj=$(patsubst %.c, %.o, $(src))
+target=calc
+
+$(target):$(obj)
+        gcc $(obj)  -o $(target)
+
+%.o:%.c
+        gcc $< -c
+
+# 添加规则, 删除生成文件 *.o 可执行程序
+# 声明clean为伪文件
+.PHONY:clean
+clean:
+        # shell命令前的 - 表示强制这个指令执行, 如果执行失败也不会终止
+        -rm $(obj) $(target) 
+        echo "hello, 我是测试字符串"
+```
+
